@@ -6,29 +6,26 @@ from aiogram.types import Message, InlineKeyboardButton
 from aiogram.filters import Command, CommandObject
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.enums import ParseMode
-from langdetect import detect
 
-from googletrans import Translator, constants
-from pprint import pprint
+from googletrans import Translator
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot('6497650532:AAHdiZ81rvAWPrR4YKNNWCNvHVkT8tF9bww')
 key = '4e6d61ae4db44512ac9184730232312'
 dp = Dispatcher()
-builder = InlineKeyboardBuilder()
 
 translator = Translator()
 language = 'uk'
 
 
-def output_city(message, command):
+async def output_city(message, command):
     city = command.args
     translation = translator.translate(city, dest="en")
     url = f'https://api.weatherapi.com/v1/current.json?key=4e6d61ae4db44512ac9184730232312&q={translation.text.lower()}&aqi=no'
     weather_data = requests.get(url).json()
     checker = str(requests.get(url))
     if checker == '<Response [400]>':
-        message.answer(
+        await message.answer(
             "Такого міста немає, напишіть інше\n"
             "/weather <city>"
         )
@@ -36,7 +33,8 @@ def output_city(message, command):
         city = weather_data['location']['name']
         region = weather_data['location']['region']
         country = weather_data['location']['country']
-        builder.add(InlineKeyboardButton(
+        builder = InlineKeyboardBuilder()
+        builder.row(InlineKeyboardButton(
             text="Детальніше",
             url=f"https://www.timeanddate.com/weather/{country.lower()}/{city.lower()}")
         )
@@ -48,7 +46,7 @@ def output_city(message, command):
         feels_like = round(weather_data['current']['feelslike_c'])
         last_update_time = weather_data['current']['last_updated']
 
-        message.answer(
+        await message.answer(
             f"<b>Місцезнаходження:</b>\n"
             f"<b>Місто:</b> {trans_city.text}\n"
             f"<b>Регіон:</b> {trans_region.text}\n"
@@ -91,7 +89,7 @@ async def cmd_lang(
         message: Message
 ):
     await message.answer(
-        "Pinus"
+        "Команда у розробці"
     )
 
 
@@ -101,12 +99,18 @@ async def cmd_weather(
         command: CommandObject
 ):
     if command.args is None:
-        await message.answer(
-            "Введіть назву міста!"
-
+        await message.reply(
+            "Введіть назву міста!\n",
         )
+
+        @dp.message()
+        async def get_city(
+                city: Message):
+            city_command = CommandObject(prefix='/', command='weather', mention=None, args=city.text)
+            await output_city(city, city_command)
     else:
-        output_city(message, command)
+
+        await output_city(message, command)
 
 
 async def main():
