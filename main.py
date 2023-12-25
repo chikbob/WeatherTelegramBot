@@ -30,10 +30,14 @@ async def cmd_lang(
     trans_pol = translator.translate("🇵🇱Польска мова", dest=language)
 
     kb = [
-        [KeyboardButton(text=f"{trans_ukr.text}"),
-         KeyboardButton(text=f"{trans_eng.text}"),
-         KeyboardButton(text=f"{trans_rus.text}"),
-         KeyboardButton(text=f"{trans_pol.text}")]
+        [
+            KeyboardButton(text=f"{trans_ukr.text}"),
+            KeyboardButton(text=f"{trans_eng.text}"),
+        ],
+        [
+            KeyboardButton(text=f"{trans_rus.text}"),
+            KeyboardButton(text=f"{trans_pol.text}")
+        ]
     ]
 
     keyboard = ReplyKeyboardMarkup(
