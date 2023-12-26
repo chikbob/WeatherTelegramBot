@@ -18,6 +18,37 @@ translator = Translator()
 language = 'uk'
 
 
+@dp.message(Command("start"))
+async def cmd_weather(
+        message: Message
+):
+    trans_hello = translator.translate("Привіт", dest=language)
+    trans_message_first = translator.translate("Цей бот дає інформацію про погоду в усіх містах СВІТУ", dest=language)
+    trans_message_second = translator.translate("Для цього потрібно написати команду", dest=language)
+    trans_city = translator.translate("<Місто>", dest=language)
+    await message.answer(
+        f"{trans_hello.text} {message.chat.first_name}!\n"
+        f"{trans_message_first.text}\n"
+        f"{trans_message_second.text} /weather {trans_city.text}\n",
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+
+@dp.message(Command("help"))
+async def cmd_help(
+        message: Message
+):
+    trans_commands = translator.translate("Усі команди", dest=language)
+    trans_city = translator.translate("<Місто>", dest=language)
+    await message.answer(
+        f"{trans_commands.text}:\n"
+        "/start\n"
+        f"/weather {trans_city.text}\n"
+        "/lang\n",
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+
 @dp.message(Command("lang"))
 async def cmd_lang(
         lang_message: Message
@@ -80,6 +111,32 @@ async def cmd_lang(
     return
 
 
+@dp.message(Command("weather"))
+async def cmd_weather(
+        message: Message,
+        command: CommandObject,
+):
+    trans_choice = translator.translate("Введіть", dest=language)
+    trans_city = translator.translate("<Місто>!", dest=language)
+    if command.args is None:
+        await message.reply(
+            f"{trans_choice.text} /weather {trans_city.text}\n",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        # @dp.message(F.text)
+        # async def get_city(
+        #         city: Message):
+        #     city_command = CommandObject(prefix='/', command='weather', mention=None, args=city.text)
+        #
+        #     await output_city(city, city_command)
+        #     return
+    else:
+        trans_search = translator.translate("Пошук", dest=language)
+        await message.answer(f"{trans_search.text}...", reply_markup=ReplyKeyboardRemove())
+        await output_city(message, command)
+    return
+
+
 async def output_city(message, command):
     print(language)
     city = command.args
@@ -136,65 +193,8 @@ async def output_city(message, command):
         )
 
 
-@dp.message(Command("start"))
-async def cmd_weather(
-        message: Message
-):
-    trans_hello = translator.translate("Привіт", dest=language)
-    trans_message_first = translator.translate("Цей бот дає інформацію про погоду в усіх містах СВІТУ", dest=language)
-    trans_message_second = translator.translate("Для цього потрібно написати команду", dest=language)
-    trans_city = translator.translate("<Місто>", dest=language)
-    await message.answer(
-        f"{trans_hello.text} {message.chat.first_name}!\n"
-        f"{trans_message_first.text}\n"
-        f"{trans_message_second.text} /weather {trans_city.text}\n",
-        reply_markup=ReplyKeyboardRemove()
-    )
-
-
-@dp.message(Command("help"))
-async def cmd_help(
-        message: Message
-):
-    trans_commands = translator.translate("Усі команди", dest=language)
-    trans_city = translator.translate("<Місто>", dest=language)
-    await message.answer(
-        f"{trans_commands.text}:\n"
-        "/start\n"
-        f"/weather {trans_city.text}\n"
-        "/lang\n",
-        reply_markup=ReplyKeyboardRemove()
-    )
-
-
 async def main():
     await dp.start_polling(bot)
-
-
-@dp.message(Command("weather"))
-async def cmd_weather(
-        message: Message,
-        command: CommandObject,
-):
-    trans_choice = translator.translate("Введіть", dest=language)
-    trans_city = translator.translate("<Місто>!", dest=language)
-    if command.args is None:
-        await message.reply(
-            f"{trans_choice.text} /weather {trans_city.text}\n",
-            reply_markup=ReplyKeyboardRemove()
-        )
-        # @dp.message(F.text)
-        # async def get_city(
-        #         city: Message):
-        #     city_command = CommandObject(prefix='/', command='weather', mention=None, args=city.text)
-        #
-        #     await output_city(city, city_command)
-        #     return
-    else:
-        trans_search = translator.translate("Пошук", dest=language)
-        await message.answer(f"{trans_search.text}...", reply_markup=ReplyKeyboardRemove())
-        await output_city(message, command)
-    return
 
 
 if __name__ == "__main__":
